@@ -4,15 +4,6 @@ import (
 	"fmt"
 )
 
-const MAXSIZE int = 100
-const TRUE int = 1
-const FALSE int = 0
-const OK int = 1
-const ERROR int = 0
-const INFEASIBLE int = -1
-const OVERFLOW int = -2
-
-type Status int
 type ElemType int
 
 type LNode struct {
@@ -44,7 +35,24 @@ func main() {
 	// l2, l3 := divideList(l1)
 	// printList(l2)
 	// printList(l3)
-
+	// (6)
+	// l1 := initL5()
+	// max := maxNode(l1)
+	// fmt.Println(max)
+	// (7)
+	// l1 := initL5()
+	// reverse(l1)
+	// printList(l1)
+	// (8)
+	// l1 := initL8()
+	// deleteList(l1, -4, 7)
+	// printList(l1)
+	// (9)
+	// l9 := initL9()
+	// change(*l9.next.next.next.next)
+	// printDuList(l9)
+	// (10)
+	// delItem()
 }
 
 // (1)将两个递增的有序链表合并为一个递增的有序链表。要求结果链表仍使用原来两个链表的存储空间，不另外占用其他的存储空间。表中不允许有重复的数据。
@@ -219,11 +227,138 @@ func divideList(Ta LinkList) (LinkList, LinkList) {
 	return Tb, Tc
 }
 
-//(6)设计一个算法，通过一趟遍历确定长度为n的单链表中值最大的结点。
-//(7)设计一个算法，将链表中所有结点的链接方向“原地”逆转，即要求仅利用原表的存储空间，换句话说，要求算法的空间复杂度为0(1)。
-//(8)设计一个算法，删除递增有序链表中值大于mink且小于maxk:的所有元素(mink和 maxk 是给定的两个参数，其值可以和表中的元素相同，也可以不同)。
-//(9)巳知p指向双向循环链表中的一个结点，其结点结构为data、prior、next三个域，写出 算法change(p), 交换p所指向的结点及其前驱结点的顺序。
-//(10)已知长度为n的线性表A采用顺序存储结构，请写一个时间复杂度为O(n)、空间复杂度为0(1)的算法，该算法可删除线性表中所有值为item的数据元素。
+// (6)设计一个算法，通过一趟遍历确定长度为n的单链表中值最大的结点。
+func maxNode(Ta LinkList) ElemType {
+	var p *LNode
+	p = Ta.next
+	max := p.data
+	if p.next == nil {
+		return max
+	}
+	p = p.next
+	for p != nil {
+		if p.data > max {
+			max = p.data
+		}
+		p = p.next
+	}
+	return max
+}
+
+// (7)设计一个算法，将链表中所有结点的链接方向“原地”逆转，即要求仅利用原表的存储空间，换句话说，要求算法的空间复杂度为0(1)。
+func reverse(Ta LinkList) {
+	var p, q *LNode // p记录当前遍历的节点
+	p = Ta.next     //使用头插法，但是从头遍历原始链表，那么相当于倒转。
+	Ta.next = nil   // 初始化新链表为空链表
+	for p != nil {
+		q = p.next
+		p.next = Ta.next
+		Ta.next = p
+		p = q
+	}
+}
+
+// (8)设计一个算法，删除递增有序链表中值大于mink且小于maxk:的所有元素(mink和maxk是给定的两个参数，其值可以和表中的元素相同，也可以不同)。
+func initL8() *LNode {
+	a := [9]ElemType{-7, -5, -4, 5, 6, 7, 8, 9, 12}
+	l1 := initList(a)
+	return l1
+}
+func deleteList(Ta LinkList, minK ElemType, maxK ElemType) {
+	var fDelPrior, lDelNext, p *LNode
+	p = Ta.next
+	fDelPrior = p
+	for p != nil {
+		if p.data > minK {
+			p = p.next
+			break
+		}
+		fDelPrior = p
+		p = p.next
+	}
+	for p != nil {
+		if p.data < maxK {
+			lDelNext = p.next
+			break
+		}
+		p = p.next
+	}
+	if lDelNext != nil {
+		fDelPrior.next = lDelNext
+	} else {
+		fDelPrior.next = nil
+	}
+
+}
+
+// (9)巳知p指向双向循环链表中的一个结点，其结点结构为data、prior、next三个域，写出算法change(p), 交换p所指向的结点及其前驱结点的顺序。
+func initL9() *DulNode {
+	a := [9]ElemType{-7, -5, -4, 5, 6, 7, 8, 9, 12}
+	l1 := initDuList(a)
+	return l1
+}
+
+type DulNode struct {
+	prior *DulNode
+	data  ElemType
+	next  *DulNode
+}
+
+func initDuList(s1 [9]ElemType) *DulNode {
+	linkList := DulNode{nil, 9, nil}
+	var q DuList
+	q = &linkList
+	for i := 0; i < 9; i++ {
+		var p DulNode
+		p.data = s1[i]
+		q.next = &p
+		p.prior = q
+		q = &p
+	}
+	return &linkList
+}
+func change(p DulNode) { // 交换涉及四个结点，p的前驱，p的前驱的前驱，p的后继
+	p.prior.next = p.next   // p的前驱的next指向p的后继
+	p.next.prior = p.prior  // p的后继的prior指向p的前驱
+	p.next = p.prior        // p的next指向p的前驱
+	p.prior = p.prior.prior // p的prior指向p的前驱的前驱结点
+	p.next.prior = &p       // 此时p.next已经指向了p的前驱，故前驱的prior指向p
+	p.prior.next = &p       // 原来p的前驱的前驱的next指向p
+}
+
+type DuList *DulNode
+
+func printDuList(s1 DuList) {
+	var q DuList
+	for s1 != nil {
+		fmt.Println(s1.data)
+		q = s1
+		s1 = s1.next
+	}
+	fmt.Println("piror")
+	for q != nil {
+		fmt.Println(q.data)
+		q = q.prior
+	}
+}
+
+// (10)已知长度为n的线性表A采用顺序存储结构，请写一个时间复杂度为O(n)、空间复杂度为0(1)的算法，该算法可删除线性表中所有值为item的数据元素。
+func delItem() {
+	a := []int{1, 22, 99, 4, 5, 6, 7, 89, 99, 99, 99, 1, 23, 56}
+
+	item := 99
+	k := 0 // 记录等于item的元素个数
+	for i := 0; i < len(a); i++ {
+		if a[i] == item {
+			k += 1
+			continue // 等于item的元素丢弃
+		}
+		a[i-k] = a[i] // 前面有k个元素丢弃掉，则当前空位置为i-k，把原本i位置的非item值交换到该位置
+	}
+	length := len(a) - k
+	a = a[:length]
+	fmt.Println(a)
+}
 
 func initList(s1 [9]ElemType) *LNode {
 	linkList := LNode{9, nil}
